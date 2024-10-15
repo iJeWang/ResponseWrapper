@@ -35,22 +35,22 @@ public class BusinessException extends RuntimeException {
         this.message = message;
     }
 
-    public BusinessException(WrapperStatus wrapperStatus) {
-        this(wrapperStatus.code(), wrapperStatus.message());
+    public BusinessException(IStatus iStatus) {
+        this(iStatus.getCode(), iStatus.getMessage());
     }
 
     /**
      * 使用默认的业务异常码来创建业务异常
      */
     public BusinessException(String message) {
-        this(CommonStatus.BUSINESS_ERROR.code(), message);
+        this(CommonStatus.BUSINESS_ERROR.getCode(), message);
     }
 
     /**
      * 使用默认的业务异常枚举来创建业务异常
      */
     public BusinessException() {
-        this(CommonStatus.BUSINESS_ERROR.code(), CommonStatus.BUSINESS_ERROR.message());
+        this(CommonStatus.BUSINESS_ERROR.getCode(), CommonStatus.BUSINESS_ERROR.getMessage());
     }
 
     /**

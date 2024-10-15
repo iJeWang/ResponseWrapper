@@ -28,7 +28,7 @@ public class ExceptionAdvice {
      * 处理自定义的业务异常
      */
     @ExceptionHandler(BusinessException.class)
-    public WrapperResult serviceExceptionHandler(BusinessException e, HttpServletRequest request) {
+    public WrapperResult<?> serviceExceptionHandler(BusinessException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("发生业务异常！请求地址'{}'，错误信息：'", requestURI, e);
         return WrapperResult.fail(e);
@@ -38,7 +38,7 @@ public class ExceptionAdvice {
      * 404 异常
      */
     @ExceptionHandler(NoHandlerFoundException.class)
-    public WrapperResult handleNoHandlerFoundException(NoHandlerFoundException noHandlerFoundException, HttpServletRequest request) {
+    public WrapperResult<?> handleNoHandlerFoundException(NoHandlerFoundException noHandlerFoundException, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("请求资源不存在！请求地址'{}'，错误信息：", requestURI, noHandlerFoundException);
         return WrapperResult.fail(CommonStatus.NO_HANDLER_FOUND);
@@ -48,7 +48,7 @@ public class ExceptionAdvice {
      * 权限校验异常
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public WrapperResult handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+    public WrapperResult<?> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("发生权限校验异常！请求地址'{}'，错误信息：", requestURI, e);
         return WrapperResult.fail(CommonStatus.ACCESS_DENIED);
@@ -58,7 +58,7 @@ public class ExceptionAdvice {
      * 请求方式不支持
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public WrapperResult handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+    public WrapperResult<?> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("Http请求方式不支持！请求地址'{}'，不支持'{}'请求", requestURI, e.getMethod());
         return WrapperResult.fail(CommonStatus.HTTP_METHOD_NOT_SUPPORTED);
@@ -68,7 +68,7 @@ public class ExceptionAdvice {
      * 处理参数校验异常
      */
     @ExceptionHandler(BindException.class)
-    public WrapperResult handleBindException(BindException e, HttpServletRequest request) {
+    public WrapperResult<?> handleBindException(BindException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("发生参数校验异常！请求地址'{}'，错误信息：", requestURI, e);
         return WrapperResult.fail(CommonStatus.BAD_REQUEST);
@@ -78,7 +78,7 @@ public class ExceptionAdvice {
      * 拦截未知的运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
-    public WrapperResult handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+    public WrapperResult<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         logger.error("发生未知异常！请求地址'{}'，错误信息：", requestURI, e);
         return WrapperResult.fail(CommonStatus.INTERNAL_SERVER_ERROR);

@@ -8,7 +8,7 @@ import org.springframework.lang.NonNull;
  * @author iWeJang
  * @version 2.0
  */
-public enum CommonStatus implements WrapperStatus {
+public enum CommonStatus implements IStatus {
     // 通用成功
     SUCCESS(200, "操作成功"),
 
@@ -51,7 +51,7 @@ public enum CommonStatus implements WrapperStatus {
     //通用的业务异常
     BUSINESS_ERROR(5000, "业务系统中错误");
 
-    private final int code;
+    private final Integer code;
     private final String message;
 
     private CommonStatus(@NonNull int code, @NonNull String message) {
@@ -60,12 +60,12 @@ public enum CommonStatus implements WrapperStatus {
     }
 
     @Override
-    public int code() {
+    public Integer getCode() {
         return code;
     }
 
     @Override
-    public String message() {
+    public String getMessage() {
         return message;
     }
 }

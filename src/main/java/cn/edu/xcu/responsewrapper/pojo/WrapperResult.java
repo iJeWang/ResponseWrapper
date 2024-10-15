@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @version 2.0
  */
 @Data
-public class WrapperResult implements Serializable {
+public class WrapperResult<T> implements Serializable {
 
     /**
      * 序列化版本号
@@ -24,7 +24,7 @@ public class WrapperResult implements Serializable {
     /**
      * 状态码
      */
-    private int code;
+    private Integer code;
 
     /**
      * 状态描述，如成功提示或错误详情
@@ -34,12 +34,12 @@ public class WrapperResult implements Serializable {
     /**
      * 返回的数据，异常时返回null
      */
-    private Object data;
+    private T data;
 
     /**
      * 私有构造函数，禁止外部实例化。
      */
-    private WrapperResult(@NonNull int code, @NonNull String message, Object data) {
+    private WrapperResult(@NonNull int code, @NonNull String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -51,23 +51,23 @@ public class WrapperResult implements Serializable {
      * @param data 后端返回的数据
      * @return 成功的响应结果
      */
-    public static WrapperResult success(Object data) {
-        return new WrapperResult(CommonStatus.SUCCESS.code(),
-                CommonStatus.SUCCESS.message(),
+    public static <T> WrapperResult<T> success(T data) {
+        return new WrapperResult<>(CommonStatus.SUCCESS.getCode(),
+                CommonStatus.SUCCESS.getMessage(),
                 data);
     }
 
     /**
-     * 封装内置的异常（内置的异常已经提供了对应的 WrapperStatus）
+     * 封装内置的异常（内置的异常已经提供了对应的 IStatus）
      */
-    public static WrapperResult fail(WrapperStatus wrapperStatus) {
-        return new WrapperResult(wrapperStatus.code(), wrapperStatus.message(), null);
+    public static <T> WrapperResult<T> fail(IStatus iStatus) {
+        return new WrapperResult<>(iStatus.getCode(), iStatus.getMessage(), null);
     }
 
     /**
      * 封装自定义的业务异常
      */
-    public static WrapperResult fail(BusinessException e) {
-        return new WrapperResult(e.getCode(), e.getMessage(), null);
+    public static <T> WrapperResult<T> fail(BusinessException e) {
+        return new WrapperResult<>(e.getCode(), e.getMessage(), null);
     }
 }

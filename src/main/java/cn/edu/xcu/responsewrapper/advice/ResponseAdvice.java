@@ -2,6 +2,8 @@ package cn.edu.xcu.responsewrapper.advice;
 
 import cn.edu.xcu.responsewrapper.annotation.NoResponseWrapper;
 import cn.edu.xcu.responsewrapper.pojo.WrapperResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -36,8 +38,17 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
      */
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        //如果已经被包装了，就不进行包装
         if (body instanceof WrapperResult) {
             return body;
+        }
+        // 如果返回值是String类型，那就手动把封装对象转换成JSON字符串
+        if (body instanceof String) {
+            try {
+                return new ObjectMapper().writeValueAsString(WrapperResult.success(body));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
         return WrapperResult.success(body);
     }

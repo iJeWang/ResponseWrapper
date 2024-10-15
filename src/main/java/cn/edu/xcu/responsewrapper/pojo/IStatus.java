@@ -13,14 +13,14 @@ package cn.edu.xcu.responsewrapper.pojo;
  * @author iWeJang
  * @version 2.0
  */
-public interface WrapperStatus {
+public interface IStatus {
     /**
      * 状态码
      */
-    int code();
+    Integer getCode();
 
     /**
      * 状态的描述
      */
-    String message();
+    String getMessage();
 }

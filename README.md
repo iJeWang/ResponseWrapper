@@ -1,10 +1,10 @@
-## 1. 统一响应状态：状态接口（WrapperStatus）和通用状态枚举类（CommonStatus）
+## 1. 统一返回结构：状态接口（IStatus）和通用状态枚举类（CommonStatus）
 
 ## 2. 统一返回格式（WrapperResult）
 
-## 3. 统一返回格式的高级实现：自定义注解（NoResponseWrapper）+ 控制器增强（ResponseAdvice）
+## 3. 统一包装处理：自定义注解（NoResponseWrapper）+ 控制器增强（ResponseAdvice）
 
-只要没有 NoResponseWrapper 注解，就会对响应进行封装
+如果每一个 Controller 方法内都封装一次，比较重复，所以还要继续统一包装处理： 只要没有 NoResponseWrapper 注解，就会对响应进行封装
 
 ## 4. Controller 全局异常处理：自定义业务异常（BusinessException）+ 全局异常处理（@ExceptionAdvice+@RestControllerAdvice）
 
@@ -20,13 +20,13 @@
 
 ## 6. 封装 String 类型时报错
 
-使用 @ResponseBody 注解或者 @RestController 注解时，Spring 会自动使用 HttpMessageConverter 来将返回值转换为客户端可以接收的格式：
+使用 @ResponseBody 注解或者 @RestController 注解时，Spring 会自动使用 HttpMessageConverter 来将返回值转换为 Json 字符串：
 
-* 对于 String 类型，Spring 默认使用 StringHttpMessageConverter 来处理 String 类型的返回值。如果控制器方法返回了一个封装后的对象，而不是一个简单的 String，那么在转换过程中就会出现 ClassCastException。
+* 对于 String 类型的返回值，Spring 首先使用 StringHttpMessageConverter 来处理。经过封装后的 String 自然就不能使用该转换器了，那么在转换过程中就会出现 ClassCastException。
 
-* 对于其他类型，Spring 提供了默认的消息转换器（例如MappingJackson2HttpMessageConverter用于JSON），这些转换器能够处理对象到字符串的转换。
+* 对于其他类型的返回值，Spring 首先使用 MappingJackson2HttpMessageConverter 来处理。这些类型即使经过封装也还是一个对象，该转换器自然还能够处理，不会有问题。
 
-解决方法就是删除 String 默认的转换器：
+### ~~方法一：删除 String 默认的转换器~~
    ```
    @Override
    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -34,8 +34,37 @@
    converters.removeIf(x -> x instanceof StringHttpMessageConverter);
    }
    ```
-但是这样的话，String 类型的数据就只能经过封装了，否则无法解析，所以最优的方法是自定义一个消息转换器。
+但是这样的话，String 类型的数据就只能经过封装了，否则无法解析并报错
 
+### 方法二：修改转换器的顺序
+
+发生上述问题的根源所在是集合中 StringHttpMessageConverter 的顺序先于 MappingJackson2HttpMessageConverter 的，调整顺序后即可从根源上解决这个问题
+
+    ```
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        for (int i = 0; i < converters.size(); i++) {
+            if (converters.get(i) instanceof MappingJackson2HttpMessageConverter) {
+                MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = (MappingJackson2HttpMessageConverter) converters.get(i);
+                converters.set(i, converters.get(0));
+                converters.set(0, mappingJackson2HttpMessageConverter);
+                break;
+            }
+        }
+    }
+    ```
+
+### 方法三：针对 String 类型，对封装对象手动转换成 JSON 字符串
+    ```
+    // 如果返回值是String类型，那就手动把封装对象转换成JSON字符串
+    if (body instanceof String) {
+        try {
+            return new ObjectMapper().writeValueAsString(WrapperResult.success(body));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    ```
 ## 7. Interceptor 中的异常
 
 @RestControllerAdvice（或@ControllerAdvice）+ @ExceptionAdvice 虽然是处理 Controller 层的异常，但是也能处理 Interceptor 中的异常。
